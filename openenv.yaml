@@ -4,7 +4,7 @@ description: >
   An AI agent environment where the agent audits a company's SaaS subscriptions
   and makes cost-saving decisions without breaking business-critical operations.
 
-author: SaaSAuditEnv Team
+author: Gaurav Suresh Malik
 license: MIT
 
 environment:
@@ -96,7 +96,8 @@ actions:
     description: Consolidate overlapping tools by keeping one and cancelling the other.
 
   - name: submit_recommendation
-    required_fields: [recommendations, total_estimated_savings, executive_summary]
+    required_fields:
+      [recommendations, total_estimated_savings, executive_summary]
     description: Submit the final audit report. Ends the episode.
 
 grading:
