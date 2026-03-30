@@ -298,6 +298,17 @@ def run_episode(client: OpenAI, task_id: str) -> Dict[str, Any]:
         # Apply action
         try:
             step_result = take_step(action)
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 400:
+                # Environment returned an error (e.g. episode done)
+                try:
+                    error_body = exc.response.json()
+                    print(f"\n  [env error] {error_body.get('error', str(exc))}")
+                except Exception:
+                    print(f"\n  [env error] {exc}")
+                break
+            print(f"\n  [HTTP error] {exc}")
+            break
         except httpx.HTTPError as exc:
             print(f"\n  [HTTP error] {exc}")
             break
@@ -318,15 +329,30 @@ def run_episode(client: OpenAI, task_id: str) -> Dict[str, Any]:
             episode_result = step_result["info"]["episode_result"]
 
     if episode_result is None:
-        # Episode ended by max_steps without explicit submission
-        state = get_state()
-        episode_result = {
-            "task_id": task_id,
-            "savings_achieved": state.get("savings_achieved", 0),
-            "target_savings": state.get("target_savings", 0),
-            "score": 0.0,
-            "total_reward": sum(r["reward"] for r in obs.get("action_history", [])),
-        }
+        # Episode ended by max_steps or HTTP error without explicit submission
+        try:
+            state = get_state()
+            episode_result = {
+                "task_id": task_id,
+                "savings_achieved": state.get("savings_achieved", 0),
+                "target_savings": state.get("target_savings", 0),
+                "score": 0.0,
+                "total_reward": sum(
+                    r["reward"] for r in state.get("action_history", [])
+                ),
+            }
+        except Exception:
+            # Fallback if state is also unreachable
+            episode_result = {
+                "task_id": task_id,
+                "savings_achieved": obs.get("savings_achieved", 0),
+                "target_savings": obs.get("target_savings", 0),
+                "score": 0.0,
+                "total_reward": sum(
+                    r["reward"]
+                    for r in obs.get("action_history", [])
+                ),
+            }
 
     print()
     print(f"  RESULT: score={episode_result.get('score', 0):.4f} | "
