@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SaaSAuditEnv — Interactive Demo</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        min-height: 100vh;
+      }
+      .header {
+        background: #1e293b;
+        border-bottom: 1px solid #334155;
+        padding: 1rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .header h1 {
+        font-size: 1.4rem;
+        color: #38bdf8;
+      }
+      .header a {
+        color: #94a3b8;
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+      .header a:hover {
+        color: #38bdf8;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.5rem;
+      }
+
+      /* Task Selection */
+      .task-select {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      .task-card {
+        background: #1e293b;
+        border: 2px solid #334155;
+        border-radius: 0.75rem;
+        padding: 1.2rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .task-card:hover {
+        border-color: #38bdf8;
+        transform: translateY(-2px);
+      }
+      .task-card.active {
+        border-color: #059669;
+        background: #0f291e;
+      }
+      .task-card h3 {
+        font-size: 1rem;
+        margin-bottom: 0.3rem;
+        color: #f1f5f9;
+      }
+      .task-card .diff {
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.1rem 0.4rem;
+        border-radius: 0.2rem;
+        display: inline-block;
+        margin-bottom: 0.5rem;
+      }
+      .easy {
+        background: #065f46;
+        color: #6ee7b7;
+      }
+      .medium {
+        background: #713f12;
+        color: #fcd34d;
+      }
+      .hard {
+        background: #7f1d1d;
+        color: #fca5a5;
+      }
+      .medium-hard {
+        background: #7c2d12;
+        color: #fdba74;
+      }
+      .expert {
+        background: #581c87;
+        color: #d8b4fe;
+      }
+      .task-card .meta {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        line-height: 1.6;
+      }
+
+      /* Dashboard */
+      .dashboard {
+        display: none;
+        gap: 1.5rem;
+      }
+      .dashboard.visible {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+      }
+
+      /* Stats bar */
+      .stats {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+      }
+      .stat {
+        background: #1e293b;
+        border-radius: 0.5rem;
+        padding: 0.8rem 1.2rem;
+        flex: 1;
+        min-width: 140px;
+      }
+      .stat .label {
+        font-size: 0.7rem;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .stat .value {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-top: 0.2rem;
+      }
+      .stat .value.green {
+        color: #4ade80;
+      }
+      .stat .value.red {
+        color: #f87171;
+      }
+      .stat .value.blue {
+        color: #38bdf8;
+      }
+      .stat .value.yellow {
+        color: #facc15;
+      }
+
+      /* Progress bar */
+      .progress-wrap {
+        background: #334155;
+        border-radius: 1rem;
+        height: 8px;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+      }
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #059669, #4ade80);
+        border-radius: 1rem;
+        transition: width 0.5s ease;
+      }
+
+      /* Subscriptions table */
+      .subs-panel {
+        background: #1e293b;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        overflow-x: auto;
+      }
+      .subs-panel h2 {
+        font-size: 1rem;
+        color: #7dd3fc;
+        margin-bottom: 0.8rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+      }
+      th {
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        padding: 0.5rem;
+        text-align: left;
+        border-bottom: 1px solid #334155;
+      }
+      td {
+        padding: 0.5rem;
+        border-bottom: 1px solid #1e293b;
+        vertical-align: middle;
+      }
+      tr:hover {
+        background: #0f172a;
+      }
+      .crit-badge {
+        font-size: 0.7rem;
+        padding: 0.1rem 0.4rem;
+        border-radius: 0.2rem;
+        font-weight: 600;
+      }
+      .crit-critical {
+        background: #7f1d1d;
+        color: #fca5a5;
+      }
+      .crit-high {
+        background: #7c2d12;
+        color: #fdba74;
+      }
+      .crit-medium {
+        background: #713f12;
+        color: #fcd34d;
+      }
+      .crit-low {
+        background: #065f46;
+        color: #6ee7b7;
+      }
+      .waste-bar {
+        width: 60px;
+        height: 6px;
+        background: #334155;
+        border-radius: 3px;
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: 4px;
+      }
+      .waste-fill {
+        height: 100%;
+        border-radius: 3px;
+        background: #f87171;
+      }
+
+      /* Action panel */
+      .action-panel {
+        background: #1e293b;
+        border-radius: 0.75rem;
+        padding: 1.2rem;
+      }
+      .action-panel h2 {
+        font-size: 1rem;
+        color: #7dd3fc;
+        margin-bottom: 1rem;
+      }
+      .action-group {
+        margin-bottom: 1rem;
+      }
+      .action-group label {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        display: block;
+        margin-bottom: 0.3rem;
+      }
+      select,
+      input[type="number"],
+      input[type="text"],
+      textarea {
+        width: 100%;
+        background: #0f172a;
+        border: 1px solid #334155;
+        color: #e2e8f0;
+        padding: 0.5rem;
+        border-radius: 0.4rem;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+      }
+      select:focus,
+      input:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #38bdf8;
+      }
+      textarea {
+        resize: vertical;
+        min-height: 60px;
+      }
+      .btn {
+        padding: 0.6rem 1.2rem;
+        border: none;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.2s;
+      }
+      .btn-primary {
+        background: #2563eb;
+        color: white;
+      }
+      .btn-primary:hover {
+        background: #1d4ed8;
+      }
+      .btn-success {
+        background: #059669;
+        color: white;
+      }
+      .btn-success:hover {
+        background: #047857;
+      }
+      .btn-danger {
+        background: #dc2626;
+        color: white;
+      }
+      .btn-danger:hover {
+        background: #b91c1c;
+      }
+      .btn-warning {
+        background: #d97706;
+        color: white;
+      }
+      .btn-warning:hover {
+        background: #b45309;
+      }
+      .btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      /* Action log */
+      .log {
+        margin-top: 1rem;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .log-entry {
+        font-size: 0.78rem;
+        padding: 0.4rem 0;
+        border-bottom: 1px solid #1e293b;
+        line-height: 1.4;
+      }
+      .log-entry .success {
+        color: #4ade80;
+      }
+      .log-entry .fail {
+        color: #f87171;
+      }
+      .log-entry .reward {
+        color: #facc15;
+        font-weight: 600;
+      }
+
+      /* Score modal */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 100;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-overlay.visible {
+        display: flex;
+      }
+      .modal {
+        background: #1e293b;
+        border-radius: 1rem;
+        padding: 2rem;
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+      }
+      .modal .score {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin: 1rem 0;
+      }
+      .modal .score.high {
+        color: #4ade80;
+      }
+      .modal .score.mid {
+        color: #facc15;
+      }
+      .modal .score.low {
+        color: #f87171;
+      }
+      .modal .details {
+        text-align: left;
+        font-size: 0.85rem;
+        color: #94a3b8;
+        margin: 1rem 0;
+        line-height: 1.8;
+      }
+      .modal .btn {
+        margin-top: 1rem;
+        width: auto;
+        display: inline-block;
+        padding: 0.6rem 2rem;
+      }
+
+      /* Responsive */
+      @media (max-width: 900px) {
+        .dashboard.visible {
+          grid-template-columns: 1fr;
+        }
+        .action-panel {
+          order: -1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>SaaSAuditEnv — Interactive Demo</h1>
+      <a href="/">← Back to API Docs</a>
+    </div>
+
+    <div class="container">
+      <!-- Task Selection -->
+      <div id="taskSelection">
+        <h2 style="margin-bottom: 1rem; color: #94a3b8; font-size: 0.9rem">
+          Choose a task to begin auditing:
+        </h2>
+        <div class="task-select" id="taskCards"></div>
+        <button
+          class="btn btn-primary"
+          id="startBtn"
+          disabled
+          style="max-width: 300px; margin-top: 0.5rem"
+        >
+          Select a task to start
+        </button>
+      </div>
+
+      <!-- Dashboard -->
+      <div class="dashboard" id="dashboard">
+        <!-- Left: Stats + Subscriptions -->
+        <div>
+          <div class="stats" id="statsBar"></div>
+          <div class="progress-wrap">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+          <div class="subs-panel">
+            <h2>Subscriptions</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Tool</th>
+                  <th>Dept</th>
+                  <th>Plan</th>
+                  <th>Seats</th>
+                  <th>Active</th>
+                  <th>Waste</th>
+                  <th>Cost/mo</th>
+                  <th>Criticality</th>
+                </tr>
+              </thead>
+              <tbody id="subsTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right: Actions + Log -->
+        <div class="action-panel">
+          <h2>Take Action</h2>
+          <div class="action-group">
+            <label>Action Type</label>
+            <select id="actionType">
+              <option value="inspect_tool">🔍 Inspect Tool</option>
+              <option value="reduce_seats">📉 Reduce Seats</option>
+              <option value="downgrade_plan">⬇️ Downgrade Plan</option>
+              <option value="cancel_subscription">
+                ❌ Cancel Subscription
+              </option>
+              <option value="merge_tools">🔀 Merge Tools</option>
+              <option value="submit_recommendation">
+                📋 Submit Recommendation
+              </option>
+            </select>
+          </div>
+
+          <div id="actionFields"></div>
+
+          <button
+            class="btn btn-primary"
+            id="executeBtn"
+            onclick="executeAction()"
+          >
+            Execute Action
+          </button>
+
+          <div class="log" id="actionLog">
+            <h3
+              style="
+                font-size: 0.85rem;
+                color: #64748b;
+                margin: 0.8rem 0 0.5rem;
+              "
+            >
+              Action Log
+            </h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Score Modal -->
+    <div class="modal-overlay" id="scoreModal">
+      <div class="modal">
+        <h2 style="color: #7dd3fc">Episode Complete!</h2>
+        <div class="score" id="finalScore">0.00</div>
+        <div class="details" id="scoreDetails"></div>
+        <button class="btn btn-primary" onclick="resetDemo()">
+          Play Again
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const BASE = window.location.origin;
+      let currentObs = null;
+      let selectedTask = null;
+      let episodeDone = false;
+
+      // --- Task Selection ---
+      const tasks = JSON.parse("{{ tasks_json | safe | tojson }}");
+
+      const taskCards = document.getElementById("taskCards");
+      tasks.forEach((t) => {
+        const card = document.createElement("div");
+        card.className = "task-card";
+        card.dataset.taskId = t.task_id;
+        card.innerHTML = `
+        <span class="diff ${t.difficulty}">${t.difficulty}</span>
+        <h3>${t.task_id}</h3>
+        <div class="meta">
+            ${
+              t.num_subscriptions
+            } tools · $${t.total_monthly_spend.toLocaleString()}/mo<br>
+            Target: $${t.target_savings.toLocaleString()}/mo · ${
+          t.max_steps
+        } steps
+        </div>`;
+        card.onclick = () => selectTask(t.task_id, card);
+        taskCards.appendChild(card);
+      });
+
+      function selectTask(taskId, card) {
+        document
+          .querySelectorAll(".task-card")
+          .forEach((c) => c.classList.remove("active"));
+        card.classList.add("active");
+        selectedTask = taskId;
+        const btn = document.getElementById("startBtn");
+        btn.disabled = false;
+        btn.textContent = `Start ${taskId}`;
+        btn.onclick = () => startEpisode(taskId);
+      }
+
+      // --- Start Episode ---
+      async function startEpisode(taskId) {
+        const resp = await fetch(`${BASE}/reset`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ task_id: taskId }),
+        });
+        const data = await resp.json();
+        currentObs = data.observation;
+        episodeDone = false;
+        document.getElementById("taskSelection").style.display = "none";
+        document.getElementById("dashboard").classList.add("visible");
+        document.getElementById("actionLog").innerHTML =
+          '<h3 style="font-size:0.85rem;color:#64748b;margin:0.8rem 0 0.5rem">Action Log</h3>';
+        renderDashboard();
+        updateActionFields();
+      }
+
+      // --- Render Dashboard ---
+      function renderDashboard() {
+        if (!currentObs) return;
+        const o = currentObs;
+        const savingsPct =
+          o.target_savings > 0
+            ? Math.min(100, (o.savings_achieved / o.target_savings) * 100)
+            : 0;
+
+        document.getElementById("statsBar").innerHTML = `
+        <div class="stat"><div class="label">Current Spend</div><div class="value blue">$${o.current_monthly_spend.toLocaleString()}</div></div>
+        <div class="stat"><div class="label">Savings</div><div class="value green">$${o.savings_achieved.toFixed(
+          0
+        )}</div></div>
+        <div class="stat"><div class="label">Target</div><div class="value yellow">$${o.target_savings.toFixed(
+          0
+        )}</div></div>
+        <div class="stat"><div class="label">Step</div><div class="value">${
+          o.current_step
+        }/${o.max_steps}</div></div>`;
+
+        document.getElementById("progressBar").style.width = savingsPct + "%";
+
+        const tbody = document.getElementById("subsTable");
+        tbody.innerHTML = "";
+        o.subscriptions.forEach((s) => {
+          const wastePct =
+            s.seats_purchased > 0
+              ? (s.wasted_seats / s.seats_purchased) * 100
+              : 0;
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td><strong>${
+              s.name
+            }</strong><br><span style="color:#64748b;font-size:0.7rem">${
+            s.tool_id
+          }</span></td>
+            <td>${s.department}</td>
+            <td>${s.plan}</td>
+            <td>${s.seats_purchased}</td>
+            <td>${s.active_users}</td>
+            <td>${
+              s.wasted_seats
+            } <div class="waste-bar"><div class="waste-fill" style="width:${wastePct}%"></div></div></td>
+            <td>$${s.monthly_cost.toFixed(0)}</td>
+            <td><span class="crit-badge crit-${s.criticality}">${
+            s.criticality
+          }</span></td>`;
+          tbody.appendChild(tr);
+        });
+      }
+
+      // --- Action Fields ---
+      const actionType = document.getElementById("actionType");
+      actionType.addEventListener("change", updateActionFields);
+
+      function getToolOptions() {
+        if (!currentObs) return "";
+        return currentObs.subscriptions
+          .map(
+            (s) =>
+              `<option value="${s.tool_id}">${s.name} (${s.tool_id})</option>`
+          )
+          .join("");
+      }
+
+      function updateActionFields() {
+        const type = actionType.value;
+        const container = document.getElementById("actionFields");
+        const tools = getToolOptions();
+        const plans = [
+          "free",
+          "starter",
+          "basic",
+          "professional",
+          "business",
+          "enterprise",
+        ]
+          .map((p) => `<option value="${p}">${p}</option>`)
+          .join("");
+
+        const fields = {
+          inspect_tool: `<div class="action-group"><label>Tool</label><select id="f_tool_id">${tools}</select></div>`,
+          reduce_seats: `<div class="action-group"><label>Tool</label><select id="f_tool_id">${tools}</select></div>
+            <div class="action-group"><label>New Seat Count</label><input type="number" id="f_new_seat_count" min="1" value="1"></div>`,
+          downgrade_plan: `<div class="action-group"><label>Tool</label><select id="f_tool_id">${tools}</select></div>
+            <div class="action-group"><label>Target Plan</label><select id="f_target_plan">${plans}</select></div>`,
+          cancel_subscription: `<div class="action-group"><label>Tool</label><select id="f_tool_id">${tools}</select></div>
+            <div class="action-group"><label>Reason</label><textarea id="f_reason" placeholder="Why cancel this tool? (min 10 chars)"></textarea></div>`,
+          merge_tools: `<div class="action-group"><label>Keep Tool</label><select id="f_keep_tool_id">${tools}</select></div>
+            <div class="action-group"><label>Cancel Tool</label><select id="f_cancel_tool_id">${tools}</select></div>
+            <div class="action-group"><label>Reason</label><textarea id="f_reason" placeholder="Why merge? (min 10 chars)"></textarea></div>`,
+          submit_recommendation: `<div class="action-group"><label>Executive Summary</label>
+            <textarea id="f_executive_summary" placeholder="Summary of your audit findings (min 30 chars)"></textarea></div>
+            <div class="action-group"><label>Estimated Total Savings</label>
+            <input type="number" id="f_total_estimated_savings" step="0.01" value="${
+              currentObs ? currentObs.savings_achieved.toFixed(2) : "0"
+            }"></div>`,
+        };
+        container.innerHTML = fields[type] || "";
+      }
+
+      // --- Execute Action ---
+      async function executeAction() {
+        if (episodeDone) return;
+        const type = actionType.value;
+        let action = { action_type: type };
+
+        const gv = (id) => {
+          const el = document.getElementById(id);
+          return el ? el.value : null;
+        };
+
+        if (type === "inspect_tool") {
+          action.tool_id = gv("f_tool_id");
+        } else if (type === "reduce_seats") {
+          action.tool_id = gv("f_tool_id");
+          action.new_seat_count = parseInt(gv("f_new_seat_count"));
+        } else if (type === "downgrade_plan") {
+          action.tool_id = gv("f_tool_id");
+          action.target_plan = gv("f_target_plan");
+        } else if (type === "cancel_subscription") {
+          action.tool_id = gv("f_tool_id");
+          action.reason = gv("f_reason") || "No reason provided by user";
+        } else if (type === "merge_tools") {
+          action.keep_tool_id = gv("f_keep_tool_id");
+          action.cancel_tool_id = gv("f_cancel_tool_id");
+          action.reason = gv("f_reason") || "Consolidating overlapping tools";
+        } else if (type === "submit_recommendation") {
+          action.recommendations = [];
+          action.total_estimated_savings =
+            parseFloat(gv("f_total_estimated_savings")) || 0;
+          action.executive_summary =
+            gv("f_executive_summary") ||
+            "Audit complete with cost optimizations applied";
+        }
+
+        const btn = document.getElementById("executeBtn");
+        btn.disabled = true;
+        btn.textContent = "Processing...";
+
+        try {
+          const resp = await fetch(`${BASE}/step`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: action }),
+          });
+          const data = await resp.json();
+
+          if (data.error) {
+            addLog("error", type, data.error, 0);
+            btn.disabled = false;
+            btn.textContent = "Execute Action";
+            return;
+          }
+
+          currentObs = data.observation;
+          const reward = data.reward;
+          const info = data.info || {};
+          const success = info.success !== false;
+          const message = info.message || "";
+
+          addLog(success ? "success" : "fail", type, message, reward);
+          renderDashboard();
+          updateActionFields();
+
+          if (data.done) {
+            episodeDone = true;
+            btn.disabled = true;
+            btn.textContent = "Episode Complete";
+            if (info.episode_result) showScore(info.episode_result);
+          } else {
+            btn.disabled = false;
+            btn.textContent = "Execute Action";
+          }
+        } catch (err) {
+          addLog("error", type, "Request failed: " + err.message, 0);
+          btn.disabled = false;
+          btn.textContent = "Execute Action";
+        }
+      }
+
+      // --- Log ---
+      function addLog(status, actionType, message, reward) {
+        const log = document.getElementById("actionLog");
+        const cls = status === "success" ? "success" : "fail";
+        const icon = status === "success" ? "✓" : "✗";
+        const entry = document.createElement("div");
+        entry.className = "log-entry";
+        entry.innerHTML = `<span class="${cls}">${icon}</span>
+        <strong>${actionType}</strong>
+        <span class="reward">${reward >= 0 ? "+" : ""}${reward.toFixed(
+          3
+        )}</span>
+        <br><span style="color:#94a3b8">${message.substring(0, 120)}</span>`;
+        log.appendChild(entry);
+        log.scrollTop = log.scrollHeight;
+      }
+
+      // --- Score Modal ---
+      function showScore(result) {
+        const scoreEl = document.getElementById("finalScore");
+        const score = result.score || 0;
+        scoreEl.textContent = (score * 100).toFixed(1) + "%";
+        scoreEl.className =
+          "score " + (score >= 0.8 ? "high" : score >= 0.5 ? "mid" : "low");
+
+        document.getElementById("scoreDetails").innerHTML = `
+        <strong>Task:</strong> ${result.task_id}<br>
+        <strong>Savings:</strong> $${(result.savings_achieved || 0).toFixed(
+          2
+        )} / $${(result.target_savings || 0).toFixed(2)} target<br>
+        <strong>Steps taken:</strong> ${result.steps_taken}<br>
+        <strong>Critical tools preserved:</strong> ${
+          result.critical_tools_preserved ? "✅ Yes" : "❌ No"
+        }<br>
+        <strong>Invalid actions:</strong> ${result.invalid_actions}<br>
+        <strong>Total reward:</strong> ${(result.total_reward || 0).toFixed(
+          3
+        )}`;
+
+        document.getElementById("scoreModal").classList.add("visible");
+      }
+
+      function resetDemo() {
+        document.getElementById("scoreModal").classList.remove("visible");
+        document.getElementById("dashboard").classList.remove("visible");
+        document.getElementById("taskSelection").style.display = "block";
+        document
+          .querySelectorAll(".task-card")
+          .forEach((c) => c.classList.remove("active"));
+        document.getElementById("startBtn").disabled = true;
+        document.getElementById("startBtn").textContent =
+          "Select a task to start";
+        document.getElementById("executeBtn").disabled = false;
+        document.getElementById("executeBtn").textContent = "Execute Action";
+        currentObs = null;
+        episodeDone = false;
+      }
+    </script>
+  </body>
+</html>

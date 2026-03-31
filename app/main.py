@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import traceback
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 
 from app.config import config
 from app.env import SaaSAuditEnv
@@ -136,6 +136,31 @@ def state():
     if env.current_task is None:
         return jsonify({"error": "No active episode. Call /reset first."}), 400
     return jsonify(env.state()), 200
+
+
+# ---------------------------------------------------------------------------
+# Interactive Demo
+# ---------------------------------------------------------------------------
+
+@app.route("/demo", methods=["GET"])
+def demo():
+    """Interactive browser-based demo for playing the agent role."""
+    import json
+    tasks_list = []
+    for task in TASK_REGISTRY.values():
+        total_spend = sum(
+            s.seats_purchased * s.cost_per_seat_monthly
+            for s in task.subscriptions
+        )
+        tasks_list.append({
+            "task_id": task.task_id,
+            "difficulty": task.difficulty,
+            "num_subscriptions": len(task.subscriptions),
+            "total_monthly_spend": round(total_spend, 2),
+            "target_savings": task.target_savings,
+            "max_steps": task.max_steps,
+        })
+    return render_template("demo.html", tasks_json=json.dumps(tasks_list))
 
 
 # ---------------------------------------------------------------------------
@@ -271,7 +296,8 @@ def index():
         <p style="margin-top:2rem; color:#64748b; font-size:0.85rem;">
             OpenEnv Hackathon Submission &middot;
             <a href="/health">/health</a> &middot;
-            <a href="/tasks">/tasks</a>
+            <a href="/tasks">/tasks</a> &middot;
+            <a href="/demo">Interactive Demo</a>
         </p>
     </div>
 </body>
