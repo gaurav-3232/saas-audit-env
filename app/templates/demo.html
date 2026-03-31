@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SaaSAuditEnv — Interactive Demo</title>
+    <title>SaaSAuditEnv - Interactive Demo</title>
     <style>
       * {
         margin: 0;
@@ -11,7 +11,7 @@
         box-sizing: border-box;
       }
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;
         background: #0f172a;
         color: #e2e8f0;
         min-height: 100vh;
@@ -41,8 +41,6 @@
         margin: 0 auto;
         padding: 1.5rem;
       }
-
-      /* Task Selection */
       .task-select {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -103,8 +101,6 @@
         color: #94a3b8;
         line-height: 1.6;
       }
-
-      /* Dashboard */
       .dashboard {
         display: none;
         gap: 1.5rem;
@@ -113,8 +109,6 @@
         display: grid;
         grid-template-columns: 1fr 340px;
       }
-
-      /* Stats bar */
       .stats {
         display: flex;
         gap: 1rem;
@@ -151,8 +145,6 @@
       .stat .value.yellow {
         color: #facc15;
       }
-
-      /* Progress bar */
       .progress-wrap {
         background: #334155;
         border-radius: 1rem;
@@ -166,8 +158,6 @@
         border-radius: 1rem;
         transition: width 0.5s ease;
       }
-
-      /* Subscriptions table */
       .subs-panel {
         background: #1e293b;
         border-radius: 0.75rem;
@@ -237,8 +227,6 @@
         border-radius: 3px;
         background: #f87171;
       }
-
-      /* Action panel */
       .action-panel {
         background: #1e293b;
         border-radius: 0.75rem;
@@ -260,7 +248,6 @@
       }
       select,
       input[type="number"],
-      input[type="text"],
       textarea {
         width: 100%;
         background: #0f172a;
@@ -298,33 +285,10 @@
       .btn-primary:hover {
         background: #1d4ed8;
       }
-      .btn-success {
-        background: #059669;
-        color: white;
-      }
-      .btn-success:hover {
-        background: #047857;
-      }
-      .btn-danger {
-        background: #dc2626;
-        color: white;
-      }
-      .btn-danger:hover {
-        background: #b91c1c;
-      }
-      .btn-warning {
-        background: #d97706;
-        color: white;
-      }
-      .btn-warning:hover {
-        background: #b45309;
-      }
       .btn:disabled {
         opacity: 0.4;
         cursor: not-allowed;
       }
-
-      /* Action log */
       .log {
         margin-top: 1rem;
         max-height: 300px;
@@ -336,18 +300,16 @@
         border-bottom: 1px solid #1e293b;
         line-height: 1.4;
       }
-      .log-entry .success {
+      .log-entry .ok {
         color: #4ade80;
       }
-      .log-entry .fail {
+      .log-entry .err {
         color: #f87171;
       }
       .log-entry .reward {
         color: #facc15;
         font-weight: 600;
       }
-
-      /* Score modal */
       .modal-overlay {
         display: none;
         position: fixed;
@@ -368,18 +330,18 @@
         width: 90%;
         text-align: center;
       }
-      .modal .score {
+      .modal .sc {
         font-size: 3.5rem;
         font-weight: 800;
         margin: 1rem 0;
       }
-      .modal .score.high {
+      .modal .sc.high {
         color: #4ade80;
       }
-      .modal .score.mid {
+      .modal .sc.mid {
         color: #facc15;
       }
-      .modal .score.low {
+      .modal .sc.low {
         color: #f87171;
       }
       .modal .details {
@@ -395,8 +357,6 @@
         display: inline-block;
         padding: 0.6rem 2rem;
       }
-
-      /* Responsive */
       @media (max-width: 900px) {
         .dashboard.visible {
           grid-template-columns: 1fr;
@@ -409,17 +369,19 @@
   </head>
   <body>
     <div class="header">
-      <h1>SaaSAuditEnv — Interactive Demo</h1>
-      <a href="/">← Back to API Docs</a>
+      <h1>SaaSAuditEnv - Interactive Demo</h1>
+      <a href="/">Back to API Docs</a>
     </div>
-
     <div class="container">
-      <!-- Task Selection -->
-      <div id="taskSelection">
+      <div id="taskSel">
         <h2 style="margin-bottom: 1rem; color: #94a3b8; font-size: 0.9rem">
           Choose a task to begin auditing:
         </h2>
-        <div class="task-select" id="taskCards"></div>
+        <div class="task-select" id="taskCards">
+          <div style="color: #64748b; padding: 2rem; text-align: center">
+            Loading tasks...
+          </div>
+        </div>
         <button
           class="btn btn-primary"
           id="startBtn"
@@ -429,10 +391,7 @@
           Select a task to start
         </button>
       </div>
-
-      <!-- Dashboard -->
       <div class="dashboard" id="dashboard">
-        <!-- Left: Stats + Subscriptions -->
         <div>
           <div class="stats" id="statsBar"></div>
           <div class="progress-wrap">
@@ -457,37 +416,26 @@
             </table>
           </div>
         </div>
-
-        <!-- Right: Actions + Log -->
         <div class="action-panel">
           <h2>Take Action</h2>
           <div class="action-group">
             <label>Action Type</label>
-            <select id="actionType">
-              <option value="inspect_tool">🔍 Inspect Tool</option>
-              <option value="reduce_seats">📉 Reduce Seats</option>
-              <option value="downgrade_plan">⬇️ Downgrade Plan</option>
-              <option value="cancel_subscription">
-                ❌ Cancel Subscription
-              </option>
-              <option value="merge_tools">🔀 Merge Tools</option>
+            <select id="actionType" onchange="updateFields()">
+              <option value="inspect_tool">Inspect Tool</option>
+              <option value="reduce_seats">Reduce Seats</option>
+              <option value="downgrade_plan">Downgrade Plan</option>
+              <option value="cancel_subscription">Cancel Subscription</option>
+              <option value="merge_tools">Merge Tools</option>
               <option value="submit_recommendation">
-                📋 Submit Recommendation
+                Submit Recommendation
               </option>
             </select>
           </div>
-
           <div id="actionFields"></div>
-
-          <button
-            class="btn btn-primary"
-            id="executeBtn"
-            onclick="executeAction()"
-          >
+          <button class="btn btn-primary" id="exBtn" onclick="doAction()">
             Execute Action
           </button>
-
-          <div class="log" id="actionLog">
+          <div class="log" id="aLog">
             <h3
               style="
                 font-size: 0.85rem;
@@ -501,317 +449,325 @@
         </div>
       </div>
     </div>
-
-    <!-- Score Modal -->
-    <div class="modal-overlay" id="scoreModal">
+    <div class="modal-overlay" id="sModal">
       <div class="modal">
         <h2 style="color: #7dd3fc">Episode Complete!</h2>
-        <div class="score" id="finalScore">0.00</div>
-        <div class="details" id="scoreDetails"></div>
-        <button class="btn btn-primary" onclick="resetDemo()">
-          Play Again
-        </button>
+        <div class="sc" id="fScore">0.0</div>
+        <div class="details" id="sDets"></div>
+        <button class="btn btn-primary" onclick="resetAll()">Play Again</button>
       </div>
     </div>
-
     <script>
-      const BASE = window.location.origin;
-      let currentObs = null;
-      let selectedTask = null;
-      let episodeDone = false;
-
-      // --- Task Selection ---
-      const tasks = JSON.parse("{{ tasks_json | safe | tojson }}");
-
-      const taskCards = document.getElementById("taskCards");
-      tasks.forEach((t) => {
-        const card = document.createElement("div");
-        card.className = "task-card";
-        card.dataset.taskId = t.task_id;
-        card.innerHTML = `
-        <span class="diff ${t.difficulty}">${t.difficulty}</span>
-        <h3>${t.task_id}</h3>
-        <div class="meta">
-            ${
-              t.num_subscriptions
-            } tools · $${t.total_monthly_spend.toLocaleString()}/mo<br>
-            Target: $${t.target_savings.toLocaleString()}/mo · ${
-          t.max_steps
-        } steps
-        </div>`;
-        card.onclick = () => selectTask(t.task_id, card);
-        taskCards.appendChild(card);
-      });
-
-      function selectTask(taskId, card) {
-        document
-          .querySelectorAll(".task-card")
-          .forEach((c) => c.classList.remove("active"));
-        card.classList.add("active");
-        selectedTask = taskId;
-        const btn = document.getElementById("startBtn");
-        btn.disabled = false;
-        btn.textContent = `Start ${taskId}`;
-        btn.onclick = () => startEpisode(taskId);
+      var B = window.location.origin,
+        obs = null,
+        done = false;
+      function loadTasks() {
+        fetch(B + "/tasks")
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (d) {
+            var c = document.getElementById("taskCards");
+            c.innerHTML = "";
+            var t = d.tasks;
+            for (var i = 0; i < t.length; i++) {
+              (function (tk) {
+                var el = document.createElement("div");
+                el.className = "task-card";
+                el.innerHTML =
+                  '<span class="diff ' +
+                  tk.difficulty +
+                  '">' +
+                  tk.difficulty +
+                  "</span><h3>" +
+                  tk.task_id +
+                  "</h3>" +
+                  '<div class="meta">' +
+                  tk.num_subscriptions +
+                  " tools &middot; $" +
+                  Math.round(tk.total_monthly_spend).toLocaleString() +
+                  "/mo<br>Target: $" +
+                  Math.round(tk.target_savings).toLocaleString() +
+                  "/mo &middot; " +
+                  tk.max_steps +
+                  " steps</div>";
+                el.onclick = function () {
+                  var all = document.querySelectorAll(".task-card");
+                  for (var j = 0; j < all.length; j++)
+                    all[j].classList.remove("active");
+                  el.classList.add("active");
+                  var b = document.getElementById("startBtn");
+                  b.disabled = false;
+                  b.textContent = "Start " + tk.task_id;
+                  b.onclick = function () {
+                    startEp(tk.task_id);
+                  };
+                };
+                c.appendChild(el);
+              })(t[i]);
+            }
+          });
       }
-
-      // --- Start Episode ---
-      async function startEpisode(taskId) {
-        const resp = await fetch(`${BASE}/reset`, {
+      function startEp(tid) {
+        fetch(B + "/reset", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ task_id: taskId }),
-        });
-        const data = await resp.json();
-        currentObs = data.observation;
-        episodeDone = false;
-        document.getElementById("taskSelection").style.display = "none";
-        document.getElementById("dashboard").classList.add("visible");
-        document.getElementById("actionLog").innerHTML =
-          '<h3 style="font-size:0.85rem;color:#64748b;margin:0.8rem 0 0.5rem">Action Log</h3>';
-        renderDashboard();
-        updateActionFields();
+          body: JSON.stringify({ task_id: tid }),
+        })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (d) {
+            obs = d.observation;
+            done = false;
+            document.getElementById("taskSel").style.display = "none";
+            document.getElementById("dashboard").classList.add("visible");
+            document.getElementById("aLog").innerHTML =
+              '<h3 style="font-size:0.85rem;color:#64748b;margin:0.8rem 0 0.5rem">Action Log</h3>';
+            render();
+            updateFields();
+          });
       }
-
-      // --- Render Dashboard ---
-      function renderDashboard() {
-        if (!currentObs) return;
-        const o = currentObs;
-        const savingsPct =
-          o.target_savings > 0
-            ? Math.min(100, (o.savings_achieved / o.target_savings) * 100)
-            : 0;
-
-        document.getElementById("statsBar").innerHTML = `
-        <div class="stat"><div class="label">Current Spend</div><div class="value blue">$${o.current_monthly_spend.toLocaleString()}</div></div>
-        <div class="stat"><div class="label">Savings</div><div class="value green">$${o.savings_achieved.toFixed(
-          0
-        )}</div></div>
-        <div class="stat"><div class="label">Target</div><div class="value yellow">$${o.target_savings.toFixed(
-          0
-        )}</div></div>
-        <div class="stat"><div class="label">Step</div><div class="value">${
-          o.current_step
-        }/${o.max_steps}</div></div>`;
-
-        document.getElementById("progressBar").style.width = savingsPct + "%";
-
-        const tbody = document.getElementById("subsTable");
-        tbody.innerHTML = "";
-        o.subscriptions.forEach((s) => {
-          const wastePct =
-            s.seats_purchased > 0
-              ? (s.wasted_seats / s.seats_purchased) * 100
+      function render() {
+        if (!obs) return;
+        var o = obs,
+          p =
+            o.target_savings > 0
+              ? Math.min(100, (o.savings_achieved / o.target_savings) * 100)
               : 0;
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td><strong>${
-              s.name
-            }</strong><br><span style="color:#64748b;font-size:0.7rem">${
-            s.tool_id
-          }</span></td>
-            <td>${s.department}</td>
-            <td>${s.plan}</td>
-            <td>${s.seats_purchased}</td>
-            <td>${s.active_users}</td>
-            <td>${
-              s.wasted_seats
-            } <div class="waste-bar"><div class="waste-fill" style="width:${wastePct}%"></div></div></td>
-            <td>$${s.monthly_cost.toFixed(0)}</td>
-            <td><span class="crit-badge crit-${s.criticality}">${
-            s.criticality
-          }</span></td>`;
-          tbody.appendChild(tr);
-        });
-      }
-
-      // --- Action Fields ---
-      const actionType = document.getElementById("actionType");
-      actionType.addEventListener("change", updateActionFields);
-
-      function getToolOptions() {
-        if (!currentObs) return "";
-        return currentObs.subscriptions
-          .map(
-            (s) =>
-              `<option value="${s.tool_id}">${s.name} (${s.tool_id})</option>`
-          )
-          .join("");
-      }
-
-      function updateActionFields() {
-        const type = actionType.value;
-        const container = document.getElementById("actionFields");
-        const tools = getToolOptions();
-        const plans = [
-          "free",
-          "starter",
-          "basic",
-          "professional",
-          "business",
-          "enterprise",
-        ]
-          .map((p) => `<option value="${p}">${p}</option>`)
-          .join("");
-
-        const fields = {
-          inspect_tool: `<div class="action-group"><label>Tool</label><select id="f_tool_id">${tools}</select></div>`,
-          reduce_seats: `<div class="action-group"><label>Tool</label><select id="f_tool_id">${tools}</select></div>
-            <div class="action-group"><label>New Seat Count</label><input type="number" id="f_new_seat_count" min="1" value="1"></div>`,
-          downgrade_plan: `<div class="action-group"><label>Tool</label><select id="f_tool_id">${tools}</select></div>
-            <div class="action-group"><label>Target Plan</label><select id="f_target_plan">${plans}</select></div>`,
-          cancel_subscription: `<div class="action-group"><label>Tool</label><select id="f_tool_id">${tools}</select></div>
-            <div class="action-group"><label>Reason</label><textarea id="f_reason" placeholder="Why cancel this tool? (min 10 chars)"></textarea></div>`,
-          merge_tools: `<div class="action-group"><label>Keep Tool</label><select id="f_keep_tool_id">${tools}</select></div>
-            <div class="action-group"><label>Cancel Tool</label><select id="f_cancel_tool_id">${tools}</select></div>
-            <div class="action-group"><label>Reason</label><textarea id="f_reason" placeholder="Why merge? (min 10 chars)"></textarea></div>`,
-          submit_recommendation: `<div class="action-group"><label>Executive Summary</label>
-            <textarea id="f_executive_summary" placeholder="Summary of your audit findings (min 30 chars)"></textarea></div>
-            <div class="action-group"><label>Estimated Total Savings</label>
-            <input type="number" id="f_total_estimated_savings" step="0.01" value="${
-              currentObs ? currentObs.savings_achieved.toFixed(2) : "0"
-            }"></div>`,
-        };
-        container.innerHTML = fields[type] || "";
-      }
-
-      // --- Execute Action ---
-      async function executeAction() {
-        if (episodeDone) return;
-        const type = actionType.value;
-        let action = { action_type: type };
-
-        const gv = (id) => {
-          const el = document.getElementById(id);
-          return el ? el.value : null;
-        };
-
-        if (type === "inspect_tool") {
-          action.tool_id = gv("f_tool_id");
-        } else if (type === "reduce_seats") {
-          action.tool_id = gv("f_tool_id");
-          action.new_seat_count = parseInt(gv("f_new_seat_count"));
-        } else if (type === "downgrade_plan") {
-          action.tool_id = gv("f_tool_id");
-          action.target_plan = gv("f_target_plan");
-        } else if (type === "cancel_subscription") {
-          action.tool_id = gv("f_tool_id");
-          action.reason = gv("f_reason") || "No reason provided by user";
-        } else if (type === "merge_tools") {
-          action.keep_tool_id = gv("f_keep_tool_id");
-          action.cancel_tool_id = gv("f_cancel_tool_id");
-          action.reason = gv("f_reason") || "Consolidating overlapping tools";
-        } else if (type === "submit_recommendation") {
-          action.recommendations = [];
-          action.total_estimated_savings =
-            parseFloat(gv("f_total_estimated_savings")) || 0;
-          action.executive_summary =
-            gv("f_executive_summary") ||
-            "Audit complete with cost optimizations applied";
+        document.getElementById("statsBar").innerHTML =
+          '<div class="stat"><div class="label">Current Spend</div><div class="value blue">$' +
+          Math.round(o.current_monthly_spend).toLocaleString() +
+          '</div></div><div class="stat"><div class="label">Savings</div><div class="value green">$' +
+          Math.round(o.savings_achieved).toLocaleString() +
+          '</div></div><div class="stat"><div class="label">Target</div><div class="value yellow">$' +
+          Math.round(o.target_savings).toLocaleString() +
+          '</div></div><div class="stat"><div class="label">Step</div><div class="value">' +
+          o.current_step +
+          "/" +
+          o.max_steps +
+          "</div></div>";
+        document.getElementById("progressBar").style.width = p + "%";
+        var tb = document.getElementById("subsTable");
+        tb.innerHTML = "";
+        for (var i = 0; i < o.subscriptions.length; i++) {
+          var s = o.subscriptions[i],
+            wp =
+              s.seats_purchased > 0
+                ? (s.wasted_seats / s.seats_purchased) * 100
+                : 0,
+            tr = document.createElement("tr");
+          tr.innerHTML =
+            "<td><strong>" +
+            s.name +
+            "</strong><br><span style='color:#64748b;font-size:0.7rem'>" +
+            s.tool_id +
+            "</span></td><td>" +
+            s.department +
+            "</td><td>" +
+            s.plan +
+            "</td><td>" +
+            s.seats_purchased +
+            "</td><td>" +
+            s.active_users +
+            "</td><td>" +
+            s.wasted_seats +
+            ' <div class="waste-bar"><div class="waste-fill" style="width:' +
+            wp +
+            '%"></div></div></td><td>$' +
+            Math.round(s.monthly_cost).toLocaleString() +
+            "</td><td><span class='crit-badge crit-" +
+            s.criticality +
+            "'>" +
+            s.criticality +
+            "</span></td>";
+          tb.appendChild(tr);
         }
-
-        const btn = document.getElementById("executeBtn");
+      }
+      function toolOpts() {
+        if (!obs) return "";
+        var h = "";
+        for (var i = 0; i < obs.subscriptions.length; i++) {
+          var s = obs.subscriptions[i];
+          h +=
+            '<option value="' +
+            s.tool_id +
+            '">' +
+            s.name +
+            " (" +
+            s.tool_id +
+            ")</option>";
+        }
+        return h;
+      }
+      function updateFields() {
+        var t = document.getElementById("actionType").value,
+          c = document.getElementById("actionFields"),
+          o = toolOpts(),
+          pl =
+            '<option value="free">free</option><option value="starter">starter</option><option value="basic">basic</option><option value="professional">professional</option><option value="business">business</option><option value="enterprise">enterprise</option>';
+        if (t === "inspect_tool")
+          c.innerHTML =
+            '<div class="action-group"><label>Tool</label><select id="ft">' +
+            o +
+            "</select></div>";
+        else if (t === "reduce_seats")
+          c.innerHTML =
+            '<div class="action-group"><label>Tool</label><select id="ft">' +
+            o +
+            '</select></div><div class="action-group"><label>New Seat Count</label><input type="number" id="fn" min="1" value="1"></div>';
+        else if (t === "downgrade_plan")
+          c.innerHTML =
+            '<div class="action-group"><label>Tool</label><select id="ft">' +
+            o +
+            '</select></div><div class="action-group"><label>Target Plan</label><select id="fp">' +
+            pl +
+            "</select></div>";
+        else if (t === "cancel_subscription")
+          c.innerHTML =
+            '<div class="action-group"><label>Tool</label><select id="ft">' +
+            o +
+            '</select></div><div class="action-group"><label>Reason (min 10 chars)</label><textarea id="fr" placeholder="Why cancel?"></textarea></div>';
+        else if (t === "merge_tools")
+          c.innerHTML =
+            '<div class="action-group"><label>Keep Tool</label><select id="fk">' +
+            o +
+            '</select></div><div class="action-group"><label>Cancel Tool</label><select id="fc">' +
+            o +
+            '</select></div><div class="action-group"><label>Reason (min 10 chars)</label><textarea id="fr" placeholder="Why merge?"></textarea></div>';
+        else if (t === "submit_recommendation")
+          c.innerHTML =
+            '<div class="action-group"><label>Executive Summary (min 30 chars)</label><textarea id="fs" placeholder="Summary of audit findings"></textarea></div><div class="action-group"><label>Estimated Savings</label><input type="number" id="fe" step="0.01" value="' +
+            (obs ? obs.savings_achieved.toFixed(2) : "0") +
+            '"></div>';
+      }
+      function gv(id) {
+        var e = document.getElementById(id);
+        return e ? e.value : "";
+      }
+      function doAction() {
+        if (done) return;
+        var t = document.getElementById("actionType").value,
+          a = { action_type: t };
+        if (t === "inspect_tool") a.tool_id = gv("ft");
+        else if (t === "reduce_seats") {
+          a.tool_id = gv("ft");
+          a.new_seat_count = parseInt(gv("fn")) || 1;
+        } else if (t === "downgrade_plan") {
+          a.tool_id = gv("ft");
+          a.target_plan = gv("fp");
+        } else if (t === "cancel_subscription") {
+          a.tool_id = gv("ft");
+          a.reason = gv("fr") || "Cancelling unused tool";
+        } else if (t === "merge_tools") {
+          a.keep_tool_id = gv("fk");
+          a.cancel_tool_id = gv("fc");
+          a.reason = gv("fr") || "Consolidating overlapping tools";
+        } else if (t === "submit_recommendation") {
+          a.recommendations = [];
+          a.total_estimated_savings = parseFloat(gv("fe")) || 0;
+          a.executive_summary =
+            gv("fs") || "Audit complete with cost optimizations applied.";
+        }
+        var btn = document.getElementById("exBtn");
         btn.disabled = true;
         btn.textContent = "Processing...";
-
-        try {
-          const resp = await fetch(`${BASE}/step`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: action }),
+        fetch(B + "/step", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: a }),
+        })
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (d) {
+            if (d.error) {
+              addLog(0, t, d.error, 0);
+              btn.disabled = false;
+              btn.textContent = "Execute Action";
+              return;
+            }
+            obs = d.observation;
+            var rw = d.reward,
+              info = d.info || {},
+              ok = info.success !== false,
+              msg = info.message || "";
+            addLog(ok ? 1 : 0, t, msg, rw);
+            render();
+            updateFields();
+            if (d.done) {
+              done = true;
+              btn.disabled = true;
+              btn.textContent = "Episode Complete";
+              if (info.episode_result) showSc(info.episode_result);
+            } else {
+              btn.disabled = false;
+              btn.textContent = "Execute Action";
+            }
+          })
+          .catch(function (e) {
+            addLog(0, t, "Error: " + e.message, 0);
+            btn.disabled = false;
+            btn.textContent = "Execute Action";
           });
-          const data = await resp.json();
-
-          if (data.error) {
-            addLog("error", type, data.error, 0);
-            btn.disabled = false;
-            btn.textContent = "Execute Action";
-            return;
-          }
-
-          currentObs = data.observation;
-          const reward = data.reward;
-          const info = data.info || {};
-          const success = info.success !== false;
-          const message = info.message || "";
-
-          addLog(success ? "success" : "fail", type, message, reward);
-          renderDashboard();
-          updateActionFields();
-
-          if (data.done) {
-            episodeDone = true;
-            btn.disabled = true;
-            btn.textContent = "Episode Complete";
-            if (info.episode_result) showScore(info.episode_result);
-          } else {
-            btn.disabled = false;
-            btn.textContent = "Execute Action";
-          }
-        } catch (err) {
-          addLog("error", type, "Request failed: " + err.message, 0);
-          btn.disabled = false;
-          btn.textContent = "Execute Action";
-        }
       }
-
-      // --- Log ---
-      function addLog(status, actionType, message, reward) {
-        const log = document.getElementById("actionLog");
-        const cls = status === "success" ? "success" : "fail";
-        const icon = status === "success" ? "✓" : "✗";
-        const entry = document.createElement("div");
-        entry.className = "log-entry";
-        entry.innerHTML = `<span class="${cls}">${icon}</span>
-        <strong>${actionType}</strong>
-        <span class="reward">${reward >= 0 ? "+" : ""}${reward.toFixed(
-          3
-        )}</span>
-        <br><span style="color:#94a3b8">${message.substring(0, 120)}</span>`;
-        log.appendChild(entry);
-        log.scrollTop = log.scrollHeight;
+      function addLog(ok, at, msg, rw) {
+        var lg = document.getElementById("aLog"),
+          en = document.createElement("div");
+        en.className = "log-entry";
+        var rs = rw >= 0 ? "+" + rw.toFixed(3) : rw.toFixed(3);
+        en.innerHTML =
+          '<span class="' +
+          (ok ? "ok" : "err") +
+          '">' +
+          (ok ? "OK" : "FAIL") +
+          "</span> <strong>" +
+          at +
+          '</strong> <span class="reward">' +
+          rs +
+          "</span><br><span style='color:#94a3b8'>" +
+          msg.substring(0, 120) +
+          "</span>";
+        lg.appendChild(en);
+        lg.scrollTop = lg.scrollHeight;
       }
-
-      // --- Score Modal ---
-      function showScore(result) {
-        const scoreEl = document.getElementById("finalScore");
-        const score = result.score || 0;
-        scoreEl.textContent = (score * 100).toFixed(1) + "%";
-        scoreEl.className =
-          "score " + (score >= 0.8 ? "high" : score >= 0.5 ? "mid" : "low");
-
-        document.getElementById("scoreDetails").innerHTML = `
-        <strong>Task:</strong> ${result.task_id}<br>
-        <strong>Savings:</strong> $${(result.savings_achieved || 0).toFixed(
-          2
-        )} / $${(result.target_savings || 0).toFixed(2)} target<br>
-        <strong>Steps taken:</strong> ${result.steps_taken}<br>
-        <strong>Critical tools preserved:</strong> ${
-          result.critical_tools_preserved ? "✅ Yes" : "❌ No"
-        }<br>
-        <strong>Invalid actions:</strong> ${result.invalid_actions}<br>
-        <strong>Total reward:</strong> ${(result.total_reward || 0).toFixed(
-          3
-        )}`;
-
-        document.getElementById("scoreModal").classList.add("visible");
+      function showSc(r) {
+        var el = document.getElementById("fScore"),
+          sc = r.score || 0;
+        el.textContent = (sc * 100).toFixed(1) + "%";
+        el.className = "sc " + (sc >= 0.8 ? "high" : sc >= 0.5 ? "mid" : "low");
+        document.getElementById("sDets").innerHTML =
+          "<strong>Task:</strong> " +
+          r.task_id +
+          "<br><strong>Savings:</strong> $" +
+          (r.savings_achieved || 0).toFixed(2) +
+          " / $" +
+          (r.target_savings || 0).toFixed(2) +
+          " target<br><strong>Steps:</strong> " +
+          r.steps_taken +
+          "<br><strong>Critical tools preserved:</strong> " +
+          (r.critical_tools_preserved ? "Yes" : "No") +
+          "<br><strong>Invalid actions:</strong> " +
+          r.invalid_actions +
+          "<br><strong>Total reward:</strong> " +
+          (r.total_reward || 0).toFixed(3);
+        document.getElementById("sModal").classList.add("visible");
       }
-
-      function resetDemo() {
-        document.getElementById("scoreModal").classList.remove("visible");
+      function resetAll() {
+        document.getElementById("sModal").classList.remove("visible");
         document.getElementById("dashboard").classList.remove("visible");
-        document.getElementById("taskSelection").style.display = "block";
-        document
-          .querySelectorAll(".task-card")
-          .forEach((c) => c.classList.remove("active"));
+        document.getElementById("taskSel").style.display = "block";
+        var c = document.querySelectorAll(".task-card");
+        for (var i = 0; i < c.length; i++) c[i].classList.remove("active");
         document.getElementById("startBtn").disabled = true;
         document.getElementById("startBtn").textContent =
           "Select a task to start";
-        document.getElementById("executeBtn").disabled = false;
-        document.getElementById("executeBtn").textContent = "Execute Action";
-        currentObs = null;
-        episodeDone = false;
+        document.getElementById("exBtn").disabled = false;
+        document.getElementById("exBtn").textContent = "Execute Action";
+        obs = null;
+        done = false;
       }
+      loadTasks();
     </script>
   </body>
 </html>

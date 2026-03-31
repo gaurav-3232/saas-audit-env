@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import traceback
 
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request
 
 from app.config import config
 from app.env import SaaSAuditEnv
@@ -145,22 +145,12 @@ def state():
 @app.route("/demo", methods=["GET"])
 def demo():
     """Interactive browser-based demo for playing the agent role."""
-    import json
-    tasks_list = []
-    for task in TASK_REGISTRY.values():
-        total_spend = sum(
-            s.seats_purchased * s.cost_per_seat_monthly
-            for s in task.subscriptions
-        )
-        tasks_list.append({
-            "task_id": task.task_id,
-            "difficulty": task.difficulty,
-            "num_subscriptions": len(task.subscriptions),
-            "total_monthly_spend": round(total_spend, 2),
-            "target_savings": task.target_savings,
-            "max_steps": task.max_steps,
-        })
-    return render_template("demo.html", tasks_json=json.dumps(tasks_list))
+    import os
+    template_path = os.path.join(
+        os.path.dirname(__file__), "templates", "demo.html"
+    )
+    with open(template_path, "r") as f:
+        return f.read(), 200
 
 
 # ---------------------------------------------------------------------------
