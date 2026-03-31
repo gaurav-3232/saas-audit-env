@@ -211,7 +211,7 @@ class EpisodeResult(BaseModel):
 
 class ResetRequest(BaseModel):
     """Request body for /reset."""
-    task_id: str
+    task_id: str = "task_easy"
 
 
 class ActionRequest(BaseModel):
