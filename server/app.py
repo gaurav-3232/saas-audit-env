@@ -9,7 +9,7 @@ from app.main import app
 
 
 def main(host="0.0.0.0", port=7860):
-    """Entry point for direct execution via uv run or python -m."""
+    """Entry point for direct execution."""
     import asyncio
     from hypercorn.config import Config
     from hypercorn.asyncio import serve
@@ -21,9 +21,4 @@ def main(host="0.0.0.0", port=7860):
 
 
 if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--port", type=int, default=7860)
-    parser.add_argument("--host", type=str, default="0.0.0.0")
-    args = parser.parse_args()
-    main(host=args.host, port=args.port)
+    main()
