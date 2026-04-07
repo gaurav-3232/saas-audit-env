@@ -270,6 +270,9 @@ def run_episode(client: OpenAI, task_id: str) -> Dict[str, Any]:
     reset_resp = reset_task(task_id)
     obs = reset_resp["observation"]
 
+    # Structured output for validator
+    print(f"[START] task={task_id}", flush=True)
+
     print(f"  Goal: {obs['goal'][:80]}...")
     print(f"  Starting spend: ${obs['current_monthly_spend']:.2f}/mo")
     print(f"  Target savings: ${obs['target_savings']:.2f}/mo")
@@ -322,6 +325,10 @@ def run_episode(client: OpenAI, task_id: str) -> Dict[str, Any]:
             short_msg = last_record["message"][:60]
             print(f" → {status} reward={reward:+.3f} | {short_msg}")
 
+        # Structured output for validator
+        step_num = obs.get("current_step", 0)
+        print(f"[STEP] step={step_num} reward={reward} done={step_result.get('done', False)}", flush=True)
+
         if raw_response:
             conversation.append({"role": "assistant", "content": raw_response})
 
@@ -360,6 +367,11 @@ def run_episode(client: OpenAI, task_id: str) -> Dict[str, Any]:
           f"${episode_result.get('target_savings', 0):.2f} target")
     if llm_failures:
         print(f"  LLM failures (used fallback): {llm_failures}")
+
+    # Structured output for validator
+    ep_score = episode_result.get('score', 0)
+    ep_steps = episode_result.get('steps_taken', obs.get('current_step', 0))
+    print(f"[END] task={task_id} score={ep_score} steps={ep_steps}", flush=True)
 
     return episode_result
 
